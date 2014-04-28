@@ -9,78 +9,55 @@ using namespace std;
 
 int main( int argc, char** argv )
 {	
-    cvNamedWindow ("original", CV_WINDOW_AUTOSIZE ) ;
-	cvNamedWindow ("canny", CV_WINDOW_AUTOSIZE ) ;
+    namedWindow("original", WINDOW_AUTOSIZE );
+	namedWindow("canny");
 	string dir = "..\\training\\1\\";
 	char buffer [10];	
-	IplImage* img;
-	IplImage* binaryImage;
-	IplImage* normalized;
-	IplImage* gauss;
-	IplImage* cannyimg;
+	Mat img;
+	Mat binaryImage;
+	Mat normalized;
+	Mat gauss;
+	Mat cannyimg;
 	for (int i = 0; i <= 119; i++)
-	{		
+	{
+		try{
 		sprintf(buffer, "%010d", i);
 		ostringstream path;
 		path << dir << buffer << ".png";
-
-		img = cvLoadImage (path.str().c_str()); 
-		if (! img ) {
+		
+		Mat img = imread(path.str().c_str()); 
+		if (!img.data) {
 			cerr << " Could not load image file : " << path.str() << endl ;
 			exit ( EXIT_FAILURE ) ;
 		}
+		int c = img.channels();
 	
-		binaryImage = cvCreateImage(cvGetSize(img), IPL_DEPTH_8U, 1);
-		cvSplit (img, binaryImage, NULL , NULL , NULL );
+		Mat binaryImage = Mat(img.rows, img.cols, CV_8UC1);
+		cvtColor(img, binaryImage, CV_RGB2GRAY);		
     
-		normalized = cvCreateImage (cvGetSize (img), img ->depth , 1); 
-		cvEqualizeHist ( binaryImage , normalized );
+		Mat normalized =  Mat(img.size(), img.depth()); 
+		equalizeHist(binaryImage, normalized );
 	
-		gauss = cvCreateImage ( cvGetSize (img), img->depth , 1); 
-		cvSmooth ( normalized , gauss , CV_GAUSSIAN , 13, 13);
+		Mat gauss =  Mat(img.size(), img.depth()); 
+		GaussianBlur(normalized, gauss, Size(13, 13), 0, 0);		
 
-		cannyimg = cvCreateImage ( cvGetSize (gauss), gauss ->depth , 1); 
-		cvCanny(gauss, cannyimg, 40, 130); 
-   
-		/*int dstWidth=img->width;
-		int dstHeight=img->height+img->height;
+		Mat cannyimg = Mat(img.size(), img.depth());  
+		Canny(gauss, cannyimg, 40, 130);		
 
-		IplImage* dst=cvCreateImage(cvSize(dstWidth,dstHeight),cannyimg->depth,3); 
-
-		try{
-			cvSetImageROI(dst, cvRect(0, 0,img->width,img->height));
-			cvCopy(cannyimg,dst,NULL);
-			cvResetImageROI(dst);
-
-			cvSetImageROI(dst, cvRect(0, img->height,cannyimg->width,cannyimg->height) );
-			cvCopy(img,dst,NULL);
-			cvResetImageROI(dst);
+		imshow("original", img);	
+		imshow("canny", cannyimg);	
 		}
 		catch( cv::Exception& e ){
 			const char* err_msg = e.what();
 			std::cout << "exception caught: " << err_msg << std::endl;
-		}*/
-	
-
-	
-		cvShowImage ("original", img ) ;	
-		cvShowImage ("canny", cannyimg ) ;
-
+		}		
 		
-		cvReleaseImage (&img) ;
-		cvReleaseImage (&normalized) ;
-		cvReleaseImage (&gauss) ;
-		cvReleaseImage (&cannyimg) ;
-		cvReleaseImage (&binaryImage) ;
+		
 		if(cvWaitKey (0) == 27){			
 			break;
 		}
 	}
-	
-    cvDestroyWindow ("original") ;
-	cvDestroyWindow ("canny") ;
-	
-	//cvReleaseImage (&dst) ;
+	destroyAllWindows();
 	return EXIT_SUCCESS ;
 }
 
