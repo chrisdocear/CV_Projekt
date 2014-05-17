@@ -1,63 +1,106 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
-#include <opencv2/video/background_segm.hpp>
+#include <opencv2/opencv.hpp>
+#include <vector>
 #include <opencv/cv.h>
 #include <iostream>
+#include <stdlib.h>
+#include <Windows.h>
+#include <tchar.h>
+#include "Helpers.hpp"
 
 using namespace cv;
 using namespace std;
 
+
 int main( int argc, char** argv )
 {	
-    namedWindow("original", WINDOW_AUTOSIZE );
-	namedWindow("canny");
-	string dir = "..\\training\\1\\";
-	char buffer [10];	
+	//find first file number
+	int trainingFolder = 3;
+	stringstream sstream;
+	sstream << "../training/" << trainingFolder << "/";
+	string dir = sstream.str();
+	string searchTerm = "0*";
+	TCHAR* searchString = new TCHAR[dir.size()+3];
+	searchString[dir.size()] = '0';
+	searchString[dir.size() + 1] = '*';
+	searchString[dir.size() + 2] = 0;
+	copy(dir.begin(), dir.end(), searchString);
+	WIN32_FIND_DATA FindFileData;
+	HANDLE hFind = FindFirstFile(searchString, &FindFileData);
+
+	int firstFile;
+	wstring fileString(FindFileData.cFileName);
+	wstringstream convert(fileString);
+	convert >> firstFile;
+
+	char buffer [10];
+
 	Mat img;
-	Mat binaryImage;
-	Mat normalized;
-	Mat gauss;
-	Mat cannyimg;
-	for (int i = 0; i <= 119; i++)
+	//////////////// backgroundsubtraction, exclude
+	BackgroundSubtractorMOG2 bgs = BackgroundSubtractorMOG2(20, 50);
+	cout << "nmixtures " << bgs.getInt("nmixtures") << endl;
+	cout << "backgroundRatio " << bgs.getDouble("backgroundRatio") << endl;
+	cout << "fCT " << bgs.getDouble("fCT") << endl;
+	cout << "fTau " << bgs.getDouble("fTau") << endl;
+	cout << "fVarInit " << bgs.getDouble("fVarInit") << endl;
+	cout << "fVarMin " << bgs.getDouble("fVarMin") << endl;
+	cout << "fVarMax " << bgs.getDouble("fVarMax") << endl;
+	cout << "nShadowDetection " << bgs.getInt("nShadowDetection") << endl;
+	cout << "varThreshold " << bgs.getDouble("varThreshold") << endl;
+	cout << "varThresholdGen " << bgs.getDouble("varThresholdGen") << endl;
+	cout << "history: " << bgs.getInt("history") << endl;
+	Mat fore;
+	//////////////////
+	for (int i = firstFile; ; i++)
 	{
-		try{
-		sprintf(buffer, "%010d", i);
-		ostringstream path;
-		path << dir << buffer << ".png";
-		
-		Mat img = imread(path.str().c_str()); 
-		if (!img.data) {
-			cerr << " Could not load image file : " << path.str() << endl ;
-			exit ( EXIT_FAILURE ) ;
-		}
-		int c = img.channels();
-	
-		Mat binaryImage = Mat(img.rows, img.cols, CV_8UC1);
-		cvtColor(img, binaryImage, CV_RGB2GRAY);		
-    
-		Mat normalized =  Mat(img.size(), img.depth()); 
-		equalizeHist(binaryImage, normalized );
-	
-		Mat gauss =  Mat(img.size(), img.depth()); 
-		GaussianBlur(normalized, gauss, Size(13, 13), 0, 0);		
+		try
+		{
+			sprintf(buffer, "%010d", i);
+			ostringstream path;
+			path << dir << buffer << ".png";
 
-		Mat cannyimg = Mat(img.size(), img.depth());  
-		Canny(gauss, cannyimg, 40, 130);		
+			Mat img = imread(path.str().c_str()); 
+			if (!img.data) 
+			{
+				cerr << " Could not load image file : " << path.str() << endl ;
+				exit ( EXIT_FAILURE ) ;
+			}
 
-		imshow("original", img);	
-		imshow("canny", cannyimg);	
+			//do preprocessing
+			Mat processed = preprocess(img);
+
+			//do background subtraction
+			bgs(img, fore);
+			//do postprocessing
+
+			//do object tracking
+
+			//do object classification
+
+
+			/////////////////////////include frame number, taken from opencv tutorials
+			string frameNumberString = buffer;
+			istringstream iss(frameNumberString);
+			rectangle(fore, cv::Point(10, 2), cv::Point(120,20), cv::Scalar(255,255,255), -1);
+			putText(fore, frameNumberString.c_str(), cv::Point(15, 15), FONT_HERSHEY_SIMPLEX, 0.5 , cv::Scalar(0,0,0));
+			/////////////////////////
+
+			imshow("fore ground mask", fore);	
+			imshow("original", img);
 		}
 		catch( cv::Exception& e ){
 			const char* err_msg = e.what();
 			std::cout << "exception caught: " << err_msg << std::endl;
 		}		
-		
-		
+
+
 		if(cvWaitKey (0) == 27){			
 			break;
 		}
 	}
-	destroyAllWindows();
+	cv::destroyAllWindows();
 	return EXIT_SUCCESS ;
 }
+
 
