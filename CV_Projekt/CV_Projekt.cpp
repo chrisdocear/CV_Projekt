@@ -17,7 +17,7 @@ using namespace std;
 int main( int argc, char** argv )
 {	
 	//find first file number
-	int trainingFolder = 1;
+	int trainingFolder = 4;
 	stringstream sstream;
 	sstream << "../training/" << trainingFolder << "/";
 	string dir = sstream.str();
@@ -52,10 +52,10 @@ int main( int argc, char** argv )
 	cout << "history: " << bgs.getInt("history") << endl;
 	
 	*//////////////////
-	Mat fore;
+	Mat fore(512, 1392, CV_8U);
 	Mat back;
 	//BackgroundSubtractorMOG2 bgsMog = BackgroundSubtractorMOG2(20, 50);
-	MyBackgroundSubtractor bgs = MyBackgroundSubtractor(20, 10, 2, 16);
+	MyBackgroundSubtractor bgs = MyBackgroundSubtractor(20, 20, 2, 16);
 	for (int i = firstFile; ; i++)
 	{
 		try
@@ -73,15 +73,18 @@ int main( int argc, char** argv )
 
 			//do preprocessing
 			//Mat processed = preprocess(img);
-			
+			//Mat im_gray;
+			//cvtColor(img,im_gray,CV_RGB2GRAY);
+			//imshow("gray", im_gray);
 			//do background subtraction
 			//---bgs(img, fore);
 			//bgs(img, fore);
-			fore = bgs(img);
-			back = bgs.getBackgroundImage();
-			imshow("background", back);
+			cvtColor(img,img,CV_RGB2GRAY);
+			bgs(img, fore);
+			//back = bgs.getBackgroundImage();
+			//imshow("background", back);
 			imshow("foreground", fore);
-			//imshow("original", img);
+			imshow("original", img);
 			//bgs(img, back);
 			//do postprocessing
 

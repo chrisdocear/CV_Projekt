@@ -60,20 +60,20 @@ Mat MyBackgroundSubtractor::getBackgroundImage()
 	}
 }
 
-Mat MyBackgroundSubtractor::operator() (Mat image)
+void MyBackgroundSubtractor::operator() (Mat image, Mat fgMask)
 {
 	//main bgs implementation
 	Size sz = image.size();
 	int height = sz.height;
 	int width = sz.width;
-	Mat fgMask(height, width, CV_8U);
 	srand(time(NULL));
 	if (!isInitialized)
 	{//initialize background model
 		backgroundModel = vector<Mat>(numSamples);
 		for (int i = 0; i < numSamples; i++)
 		{
-			backgroundModel[i] = Mat(height, width, CV_8UC3);
+			//backgroundModel[i] = Mat(height, width, CV_8UC3);
+			backgroundModel[i] = Mat(height, width, CV_8U);
 			for (int j = 0; j < height; j++)
 			{
 				for (int k = 0; k < width; k++)
@@ -88,8 +88,10 @@ Mat MyBackgroundSubtractor::operator() (Mat image)
 						yCoord++;
 					if (yCoord >= height)
 						yCoord--;
-					Vec3b sample = image.at<Vec3b>(yCoord, xCoord);
-					backgroundModel[i].at<Vec3b>(j, k) = sample; 
+					//Vec3b sample = image.at<Vec3b>(yCoord, xCoord);
+					//backgroundModel[i].at<Vec3b>(j, k) = sample; 
+					uchar sample = image.at<uchar>(yCoord, xCoord);
+					backgroundModel[i].at<uchar>(j, k) = sample; 
 				}
 			}
 		}
@@ -106,12 +108,13 @@ Mat MyBackgroundSubtractor::operator() (Mat image)
 				int index = 0;
 				while (count < numMinSamples && index < numSamples)
 				{//calculate euclidean distance of pixel to sample
-					Vec3b sample = backgroundModel[index].at<Vec3b>(y, x);
-					Vec3b pixel = image.at<Vec3b>(y, x);
-					Vec3b distVector = sample - pixel;
-					distance = (int) sqrt(	distVector.val[0] * distVector.val[0] + 
-						distVector.val[1] * distVector.val[1] + 
-						distVector.val[2] * distVector.val[2]);
+					//Vec3b sample = backgroundModel[index].at<Vec3b>(y, x);
+					//Vec3b pixel = image.at<Vec3b>(y, x);
+					//Vec3b distVector = sample - pixel;
+					//distance = (int) sqrt(	distVector.val[0] * distVector.val[0] + 
+					//	distVector.val[1] * distVector.val[1] + 
+					//	distVector.val[2] * distVector.val[2]);
+					distance = abs(backgroundModel[index].at<uchar>(y, x) - image.at<uchar>(y, x));
 					if (distance < radius)
 						count++;
 					index++;
@@ -123,7 +126,8 @@ Mat MyBackgroundSubtractor::operator() (Mat image)
 					if (random == 0)
 					{
 						random = rand() % numSamples;
-						backgroundModel[random].at<Vec3b>(y, x) = image.at<Vec3b>(y, x);
+						//backgroundModel[random].at<Vec3b>(y, x) = image.at<Vec3b>(y, x);
+						backgroundModel[random].at<uchar>(y, x) = image.at<uchar>(y, x);
 					}
 					random = rand() % randomSampling;
 					if (random == 0)
@@ -139,7 +143,8 @@ Mat MyBackgroundSubtractor::operator() (Mat image)
 						if (yCoord >= height)
 							yCoord--;
 						random = rand() % numSamples;
-						backgroundModel[random].at<Vec3b>(yCoord, xCoord) = image.at<Vec3b>(y, x);
+						//backgroundModel[random].at<Vec3b>(yCoord, xCoord) = image.at<Vec3b>(y, x);
+						backgroundModel[random].at<uchar>(yCoord, xCoord) = image.at<uchar>(y, x);
 					}
 				}else
 				{
@@ -148,5 +153,4 @@ Mat MyBackgroundSubtractor::operator() (Mat image)
 			}
 		}
 	}
-	return fgMask;
 }

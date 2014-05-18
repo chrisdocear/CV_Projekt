@@ -21,7 +21,7 @@ public:
 	//void setNumMinSamples();
 	//void setRandomSampling();
 	Mat getBackgroundImage();
-	Mat operator() (Mat image);
+	void operator() (Mat image, Mat fgMask);
 private:
 	//number of samples per pixel
 	int numSamples;
