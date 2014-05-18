@@ -79,7 +79,7 @@ int main( int argc, char** argv )
 			//do background subtraction
 			//---bgs(img, fore);
 			//bgs(img, fore);
-			cvtColor(img,img,CV_RGB2GRAY);
+			//cvtColor(img,img,CV_RGB2GRAY);
 			bgs(img, fore);
 			//back = bgs.getBackgroundImage();
 			//imshow("background", back);

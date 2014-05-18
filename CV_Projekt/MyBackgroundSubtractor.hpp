@@ -34,7 +34,9 @@ private:
 	//model of the background (3d matrix, because multiple samples for each pixel)
 	vector<Mat> backgroundModel;
 	//whether at least one reference image is available
-	bool isInitialized;
+	//bool isInitialized;
+	//counter, so that background model is less dependant on first frame
+	int initCounter;
 
 };
 
