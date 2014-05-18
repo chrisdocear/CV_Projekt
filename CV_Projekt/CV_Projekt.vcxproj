@@ -86,7 +86,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Helpers.hpp" />
-    <ClInclude Include="MyBackgroundSubtractor.h" />
+    <ClInclude Include="MyBackgroundSubtractor.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>

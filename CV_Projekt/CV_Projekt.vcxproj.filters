@@ -24,10 +24,10 @@
     <ClInclude Include="targetver.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="MyBackgroundSubtractor.h">
+    <ClInclude Include="Helpers.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="Helpers.hpp">
+    <ClInclude Include="MyBackgroundSubtractor.hpp">
       <Filter>Headerdateien</Filter>
     </ClInclude>
   </ItemGroup>

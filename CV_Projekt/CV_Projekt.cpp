@@ -8,15 +8,16 @@
 #include <Windows.h>
 #include <tchar.h>
 #include "Helpers.hpp"
+#include "MyBackgroundSubtractor.hpp"
 
 using namespace cv;
 using namespace std;
 
-
+ 
 int main( int argc, char** argv )
 {	
 	//find first file number
-	int trainingFolder = 3;
+	int trainingFolder = 1;
 	stringstream sstream;
 	sstream << "../training/" << trainingFolder << "/";
 	string dir = sstream.str();
@@ -35,9 +36,8 @@ int main( int argc, char** argv )
 	convert >> firstFile;
 
 	char buffer [10];
-
 	Mat img;
-	//////////////// backgroundsubtraction, exclude
+	/*/////////////// backgroundsubtraction, exclude
 	BackgroundSubtractorMOG2 bgs = BackgroundSubtractorMOG2(20, 50);
 	cout << "nmixtures " << bgs.getInt("nmixtures") << endl;
 	cout << "backgroundRatio " << bgs.getDouble("backgroundRatio") << endl;
@@ -50,8 +50,12 @@ int main( int argc, char** argv )
 	cout << "varThreshold " << bgs.getDouble("varThreshold") << endl;
 	cout << "varThresholdGen " << bgs.getDouble("varThresholdGen") << endl;
 	cout << "history: " << bgs.getInt("history") << endl;
+	
+	*//////////////////
 	Mat fore;
-	//////////////////
+	Mat back;
+	//BackgroundSubtractorMOG2 bgsMog = BackgroundSubtractorMOG2(20, 50);
+	MyBackgroundSubtractor bgs = MyBackgroundSubtractor(20, 10, 2, 16);
 	for (int i = firstFile; ; i++)
 	{
 		try
@@ -68,10 +72,17 @@ int main( int argc, char** argv )
 			}
 
 			//do preprocessing
-			Mat processed = preprocess(img);
-
+			//Mat processed = preprocess(img);
+			
 			//do background subtraction
-			bgs(img, fore);
+			//---bgs(img, fore);
+			//bgs(img, fore);
+			fore = bgs(img);
+			back = bgs.getBackgroundImage();
+			imshow("background", back);
+			imshow("foreground", fore);
+			//imshow("original", img);
+			//bgs(img, back);
 			//do postprocessing
 
 			//do object tracking
@@ -79,15 +90,15 @@ int main( int argc, char** argv )
 			//do object classification
 
 
-			/////////////////////////include frame number, taken from opencv tutorials
+			/*////////////////////////include frame number, taken from opencv tutorials
 			string frameNumberString = buffer;
 			istringstream iss(frameNumberString);
 			rectangle(fore, cv::Point(10, 2), cv::Point(120,20), cv::Scalar(255,255,255), -1);
 			putText(fore, frameNumberString.c_str(), cv::Point(15, 15), FONT_HERSHEY_SIMPLEX, 0.5 , cv::Scalar(0,0,0));
-			/////////////////////////
+			*/////////////////////////
 
-			imshow("fore ground mask", fore);	
-			imshow("original", img);
+			//imshow("fore ground mask", fore);	
+			//imshow("original", img);
 		}
 		catch( cv::Exception& e ){
 			const char* err_msg = e.what();
