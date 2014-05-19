@@ -2,7 +2,7 @@
 #include "Prepare.h"
 
 
-Prepare::Prepare() : alpha(0.05), enableThreshold(false), threshold(5)
+Prepare::Prepare()
 {
 	std::cout << "PrepareBackground()" << std::endl;
 }
@@ -13,7 +13,7 @@ Prepare::~Prepare()
 }
 
 
-void Prepare::process(const cv::Mat &img_input, cv::Mat &img_output, cv::Mat &img_bgmodel)
+void Prepare::process(const cv::Mat &img_input, cv::Mat &img_output, cv::Mat &img_bgmodel,bool useViBe)
 {
 	if(img_input.empty())
 		return;
@@ -25,13 +25,23 @@ void Prepare::process(const cv::Mat &img_input, cv::Mat &img_output, cv::Mat &im
 
 
 	cv::Mat img_background;
-	initBGS(5,15,true);
-	bgs(frame, img_foreground, alpha);
-	bgs.getBackgroundImage(img_background);
+	if(useViBe || false)
+	{
+		mbgs(20, 20, 2, 16);
+		cvtColor(frame,frame,CV_RGB2GRAY);
+		bgs(frame, img_foreground);
+		bgs.getBackgroundImage(img_background);
+	}
+	else
+	{
+		initBGS(5,15,true);
+		bgs(frame, img_foreground, 0.05);
+		bgs.getBackgroundImage(img_background);
+	}
 
 	prepareForeground();
 
-	cv::imshow("Sobel",tmp);
+	//cv::imshow("Sobel",tmp);
 	if(sfore) cv::imshow("Foreground", img_foreground);
 	if(sback) cv::imshow("Background", img_background);
 	if(smimg)
@@ -72,10 +82,9 @@ void Prepare::prepareForeground()
 {
 
 	//cv::blur(img_foreground,img_foreground,Size(7,7),Point(-1,-1),BORDER_DEFAULT);
-	if(enableThreshold)
-		cv::threshold(img_foreground, img_foreground, threshold, 255, cv::THRESH_BINARY);
+	//cv::threshold(img_foreground, img_foreground, 5, 255, cv::THRESH_BINARY);
 
-    erode(img_foreground,img_foreground,getStructuringElement(MORPH_ELLIPSE,Size(9,9)));
+    erode(img_foreground,img_foreground,getStructuringElement(MORPH_ELLIPSE,Size(5,5)));
     dilate(img_foreground,img_foreground,getStructuringElement(MORPH_ELLIPSE,Size(3,3)));
 }
 void Prepare::prepareFrame(const cv::Mat &img_input, cv::Mat &img_output)

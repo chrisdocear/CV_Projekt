@@ -36,7 +36,7 @@ int main( int argc, char** argv )
 			//show(foreground, background, manipulated image, contours on image)
 			pre.show(true,true,true,true);
 			//origin wird nicht angeruehrt, fore und back werden geupdated
-			pre.process(origin,fore,back);
+			pre.process(origin,fore,back,true);
 
 
 
