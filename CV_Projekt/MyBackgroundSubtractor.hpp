@@ -20,7 +20,7 @@ public:
 	//void setRadius();
 	//void setNumMinSamples();
 	//void setRandomSampling();
-	Mat getBackgroundImage();
+	void getBackgroundImage(Mat backgroundImage);
 	void operator() (Mat image, Mat fgMask);
 private:
 	//number of samples per pixel

@@ -17,7 +17,7 @@ using namespace std;
 int main( int argc, char** argv )
 {	
 	//find first file number
-	int trainingFolder = 4;
+	int trainingFolder = 1;
 	stringstream sstream;
 	sstream << "../training/" << trainingFolder << "/";
 	string dir = sstream.str();
@@ -37,23 +37,9 @@ int main( int argc, char** argv )
 
 	char buffer [10];
 	Mat img;
-	/*/////////////// backgroundsubtraction, exclude
-	BackgroundSubtractorMOG2 bgs = BackgroundSubtractorMOG2(20, 50);
-	cout << "nmixtures " << bgs.getInt("nmixtures") << endl;
-	cout << "backgroundRatio " << bgs.getDouble("backgroundRatio") << endl;
-	cout << "fCT " << bgs.getDouble("fCT") << endl;
-	cout << "fTau " << bgs.getDouble("fTau") << endl;
-	cout << "fVarInit " << bgs.getDouble("fVarInit") << endl;
-	cout << "fVarMin " << bgs.getDouble("fVarMin") << endl;
-	cout << "fVarMax " << bgs.getDouble("fVarMax") << endl;
-	cout << "nShadowDetection " << bgs.getInt("nShadowDetection") << endl;
-	cout << "varThreshold " << bgs.getDouble("varThreshold") << endl;
-	cout << "varThresholdGen " << bgs.getDouble("varThresholdGen") << endl;
-	cout << "history: " << bgs.getInt("history") << endl;
-	
-	*//////////////////
+
 	Mat fore(512, 1392, CV_8U);
-	Mat back;
+	Mat back(512, 1392, CV_8U);
 	//BackgroundSubtractorMOG2 bgsMog = BackgroundSubtractorMOG2(20, 50);
 	MyBackgroundSubtractor bgs = MyBackgroundSubtractor(20, 20, 2, 16);
 	for (int i = firstFile; ; i++)
@@ -79,12 +65,13 @@ int main( int argc, char** argv )
 			//do background subtraction
 			//---bgs(img, fore);
 			//bgs(img, fore);
-			//cvtColor(img,img,CV_RGB2GRAY);
+			cvtColor(img,img,CV_RGB2GRAY);
 			bgs(img, fore);
-			//back = bgs.getBackgroundImage();
-			//imshow("background", back);
+			bgs.getBackgroundImage(back);
+			if (back.data)
+				imshow("background", back);
 			imshow("foreground", fore);
-			imshow("original", img);
+			//imshow("original", img);
 			//bgs(img, back);
 			//do postprocessing
 
@@ -93,13 +80,15 @@ int main( int argc, char** argv )
 			//do object classification
 
 
-			/*////////////////////////include frame number, taken from opencv tutorials
+			/////////////////////////include frame number, taken from opencv tutorials
 			string frameNumberString = buffer;
 			istringstream iss(frameNumberString);
 			rectangle(fore, cv::Point(10, 2), cv::Point(120,20), cv::Scalar(255,255,255), -1);
 			putText(fore, frameNumberString.c_str(), cv::Point(15, 15), FONT_HERSHEY_SIMPLEX, 0.5 , cv::Scalar(0,0,0));
-			*/////////////////////////
-
+			/////////////////////////
+			ostringstream wPath;
+			wPath << dir << "fore" << buffer << ".png";
+			imwrite(wPath.str(), fore);
 			//imshow("fore ground mask", fore);	
 			//imshow("original", img);
 		}
@@ -108,10 +97,12 @@ int main( int argc, char** argv )
 			std::cout << "exception caught: " << err_msg << std::endl;
 		}		
 
-
-		if(cvWaitKey (0) == 27){			
-			break;
-		}
+		
+		
+		//if(cvWaitKey (0) == 27){			
+		//	break;
+		//}
+		
 	}
 	cv::destroyAllWindows();
 	return EXIT_SUCCESS ;
