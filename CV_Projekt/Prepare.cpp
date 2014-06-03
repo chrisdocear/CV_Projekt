@@ -22,15 +22,23 @@ void Prepare::process(const cv::Mat &img_input, cv::Mat &img_output, cv::Mat &im
 	prepareFrame(img_input,frame);
 	Sobel(img_input,tmp,CV_16S,1,0,3,1,0,BORDER_DEFAULT);
 	convertScaleAbs(tmp,tmp);
+	
+	Size sz = img_input.size();
+	int height = sz.height;
+	int width = sz.width;
 
 
 	cv::Mat img_background;
 	if(useViBe || false)
 	{
-		mbgs(20, 20, 2, 16);
+		//mbgs(20, 20, 2, 16);
 		cvtColor(frame,frame,CV_RGB2GRAY);
-		bgs(frame, img_foreground);
-		bgs.getBackgroundImage(img_background);
+		if (img_foreground.dims != 2)
+			img_foreground = Mat(height, width, CV_8U);
+		mbgs(frame, img_foreground);
+		if (img_background.dims != 2)
+			img_background = Mat(height, width, CV_8U);
+		mbgs.getBackgroundImage(img_background);
 	}
 	else
 	{
@@ -69,7 +77,7 @@ void Prepare::show(bool showForeground,bool showBackground,bool showManipulatedI
 
 void Prepare::initBGS(int history, int thereshold, bool shadowDetection)
 {
-	bgs.set("nShadowDetection",true);
+	//bgs.set("nShadowDetection",true);
 	bgs.set("varThresholdGen",0.5);
 	bgs.set("fVarInit",8);
 	bgs.set("fTau",0.2);

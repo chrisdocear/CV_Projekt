@@ -5,6 +5,7 @@
 #include <opencv/cv.h>
 #include <iostream>
 #include "Prepare.h"
+#include <Windows.h>
 
 using namespace cv;
 using namespace std;
@@ -12,14 +13,37 @@ using namespace std;
 bool first = true;
 int main( int argc, char** argv )
 {
-    namedWindow("original",WINDOW_NORMAL);
+    //find first file number
+	int trainingFolder = 5;
+	stringstream sstream;
+	sstream << "../training/" << trainingFolder << "/";
+	string dir = sstream.str();
+	string searchTerm = "0*";
+	TCHAR* searchString = new TCHAR[dir.size()+3];
+	searchString[dir.size()] = '0';
+	searchString[dir.size() + 1] = '*';
+	searchString[dir.size() + 2] = 0;
+	copy(dir.begin(), dir.end(), searchString);
+	WIN32_FIND_DATA FindFileData;
+	HANDLE hFind = FindFirstFile(searchString, &FindFileData);
+
+	int firstFile;
+	wstring fileString(FindFileData.cFileName);
+	wstringstream convert(fileString);
+	convert >> firstFile;
+	//end find first file number
+	
+	/*
+	namedWindow("original",WINDOW_NORMAL);
 	string dir = "/home/wuang/Develop/workspace/training/1/";  	//  Directory
+	*/
 	char buffer [10];
 
     Mat origin, back, fore;
     Prepare pre = Prepare();
 
-	for (int i = 0; i <= 119; i++)
+	for (int i = firstFile; i < 400; i++)
+	//for (int i = 0; i < 400; i++)
 	{
 		try
 		{

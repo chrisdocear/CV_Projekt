@@ -49,7 +49,7 @@ int MyBackgroundSubtractor::getRandomSampling()
 }
 
 void MyBackgroundSubtractor::getBackgroundImage(Mat backgroundImage)
-{//just takes first sample of every pixel as background
+{//just takes one set of random samples of every pixel as background
 	if(initCounter == 10)
 	{//no background model available
 		backgroundImage.setTo(0);
