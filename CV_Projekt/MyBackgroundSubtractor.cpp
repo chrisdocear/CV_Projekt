@@ -9,7 +9,7 @@ MyBackgroundSubtractor::MyBackgroundSubtractor()
 	radius = 20;
 	numMinSamples = 2;
 	randomSampling = 16;
-	//isInitialized = false;
+	isInitialized = false;
 	initCounter = 10;
 }
 
@@ -19,10 +19,24 @@ MyBackgroundSubtractor::MyBackgroundSubtractor(int numSamples, int radius, int n
 	this->radius = radius;
 	this->numMinSamples = numMinSamples;
 	this->randomSampling = randomSampling;
-	//isInitialized = false;
+	this->randomSpreadSampling = randomSampling / 2;
+	isInitialized = false;
 	initCounter = 10;
 }
 
+MyBackgroundSubtractor::MyBackgroundSubtractor(int numSamples, int radius, int numMinSamples, int randomSampling, int initCounter, int randomSpreadSampling)
+{
+	this->numSamples = numSamples;
+	this->radius = radius;
+	this->numMinSamples = numMinSamples;
+	this->randomSampling = randomSampling;
+	if (initCounter <= numSamples && initCounter >= 0)
+		this->initCounter = initCounter;
+	else
+		this->initCounter = numSamples;
+	this->randomSpreadSampling = randomSpreadSampling;
+	isInitialized = false;
+}
 
 MyBackgroundSubtractor::~MyBackgroundSubtractor()
 {
@@ -50,7 +64,7 @@ int MyBackgroundSubtractor::getRandomSampling()
 
 void MyBackgroundSubtractor::getBackgroundImage(Mat backgroundImage)
 {//just takes one set of random samples of every pixel as background
-	if(initCounter == 10)
+	if(!isInitialized)
 	{//no background model available
 		backgroundImage.setTo(0);
 	} else
@@ -66,8 +80,9 @@ void MyBackgroundSubtractor::operator() (Mat image, Mat fgMask)
 	int height = sz.height;
 	int width = sz.width;
 	srand(time(NULL));
-	if(initCounter == 10)
+	if(!isInitialized)
 	{//initialize background model
+		isInitialized = true;
 		backgroundModel = vector<Mat>(numSamples);
 		for (int i = 0; i <= initCounter; i++)
 		{
@@ -80,13 +95,13 @@ void MyBackgroundSubtractor::operator() (Mat image, Mat fgMask)
 					int xCoord = k + rand() % 3 - 1;
 					int yCoord = j + rand() % 3 - 1;
 					if (xCoord < 0)
-						xCoord++;
+						xCoord = 0;
 					if (xCoord >= width)
-						xCoord--;
+						xCoord = width - 1;
 					if (yCoord < 0)
-						yCoord++;
+						yCoord = 0;
 					if (yCoord >= height)
-						yCoord--;
+						yCoord = height - 1;
 					//Vec3b sample = image.at<Vec3b>(yCoord, xCoord);
 					//backgroundModel[i].at<Vec3b>(j, k) = sample;
 					uchar sample = image.at<uchar>(yCoord, xCoord);
@@ -125,7 +140,7 @@ void MyBackgroundSubtractor::operator() (Mat image, Mat fgMask)
 					index++;
 				}
 				if (count >= numMinSamples)
-				{
+				{//pixel detected as background
 					fgMask.at<uchar>(y, x) = 0;
 					int random = rand() % randomSampling;
 					if (random == 0)
@@ -135,19 +150,19 @@ void MyBackgroundSubtractor::operator() (Mat image, Mat fgMask)
 						backgroundModel[random].at<uchar>(y, x) = image.at<uchar>(y, x);
 					}
 					//random = rand() % randomSampling;
-					random = rand() % (randomSampling / 2);
+					random = rand() % (randomSpreadSampling);
 					if (random == 0)
 					{
 						int xCoord = x + rand() % 3 - 1;
 						int yCoord = y + rand() % 3 - 1;
 						if (xCoord < 0)
-							xCoord++;
+							xCoord = 0;
 						if (xCoord >= width)
-							xCoord--;
+							xCoord = width - 1;
 						if (yCoord < 0)
-							yCoord++;
+							yCoord = 0;
 						if (yCoord >= height)
-							yCoord--;
+							yCoord = height - 1;
 						random = rand() % initCounter;
 						//backgroundModel[random].at<Vec3b>(yCoord, xCoord) = image.at<Vec3b>(yCoord, xCoord);
 						backgroundModel[random].at<uchar>(yCoord, xCoord) = image.at<uchar>(y, x);

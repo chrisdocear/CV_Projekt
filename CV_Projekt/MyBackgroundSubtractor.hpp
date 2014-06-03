@@ -11,6 +11,7 @@ class MyBackgroundSubtractor :
 public:
 	MyBackgroundSubtractor();
 	MyBackgroundSubtractor(int numSamples, int radius, int numMinSamples, int randomSampling);
+	MyBackgroundSubtractor::MyBackgroundSubtractor(int numSamples, int radius, int numMinSamples, int randomSampling, int initCounter, int randomSpreadSampling);
 	~MyBackgroundSubtractor();
 	int getNumSamples();
 	int getRadius();
@@ -23,19 +24,21 @@ public:
 	void getBackgroundImage(Mat backgroundImage);
 	void operator() (Mat image, Mat fgMask);
 private:
-	//number of samples per pixel
+	//number of samples per pixel, increasing this increases probability that matching sample is found
 	int numSamples;
-	//radius of the sphere
+	//radius of the sphere (for B/W just difference), increase to classify more as background
 	int radius;
-	//number of close samples for being part of the background
+	//number of samples closer than radius for being part of the background
 	int numMinSamples;
-	//amount of random subsampling
+	//amount of random subsampling to replace background sample, lower values mean more replacements
 	int randomSampling;
-	//model of the background (3d matrix, because multiple samples for each pixel)
+	//amounts of random subsampling to replace a neighboring sample (or same), lower values mean ghosts disintegrate faster
+	int randomSpreadSampling;
+	//model of the background (vector of images, each image contains one sample of every pixel)
 	vector<Mat> backgroundModel;
 	//whether at least one reference image is available
-	//bool isInitialized;
-	//counter, so that background model is less dependant on first frame
+	bool isInitialized;
+	//counter, so that background model is less dependant on first frame, can be set with constructor, high values make strong ghosts
 	int initCounter;
 
 };
