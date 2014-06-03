@@ -88,7 +88,7 @@ int main( int argc, char** argv )
 			/////////////////////////
 			ostringstream wPath;
 			wPath << dir << "fore" << buffer << ".png";
-			imwrite(wPath.str(), fore);
+			//imwrite(wPath.str(), fore);
 			//imshow("fore ground mask", fore);	
 			//imshow("original", img);
 		}
@@ -99,9 +99,9 @@ int main( int argc, char** argv )
 
 		
 		
-		//if(cvWaitKey (0) == 27){			
-		//	break;
-		//}
+		if(cvWaitKey (0) == 27){			
+			break;
+		}
 		
 	}
 	cv::destroyAllWindows();
